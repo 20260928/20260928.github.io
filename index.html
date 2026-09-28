@@ -55,7 +55,7 @@ const chat = document.getElementById("chat");
 async function loadMessages() {
 
     const { data, error } = await supabase
-        .from("message")
+        .from("messages")
         .select("*")
         .order("id", { ascending: true });
 
@@ -84,7 +84,7 @@ message.addEventListener("keydown", async function(event) {
         }
 
         const { error } = await supabase
-            .from("message")
+            .from("messages")
             .insert({
                 message: text
             });
