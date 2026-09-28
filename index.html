@@ -42,7 +42,7 @@
 const supabaseUrl = "https://wqhcznhalhpsxchkdauz.supabase.co";
 const supabaseKey = "sb_publishable_MJMHNXpq8mx3WJ1TH5uuxw_PCMUiamL";
 
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
     supabaseUrl,
     supabaseKey
 );
@@ -83,7 +83,7 @@ message.addEventListener("keydown", async function(event) {
             return;
         }
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from("messages")
             .insert({
                 message: text
