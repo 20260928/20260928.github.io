@@ -16,35 +16,93 @@
 
 <h3>さらに小さい見出し</h3>
 
-
 <h1>映画</h1>
 <p>映画について書きます。</p>
 <p>最近見た映画です。<br>かなり面白かったです。</p>
 <hr>
 
-<img src="channels4_profile.jpg"></p>
+<img src="channels4_profile.jpg">
 
 <strong>重要な文字</strong>
 
 <em>強調した文字</em>
 
-<p><input type="text" id="message" ></p>
+<p><input type="text" id="message"></p>
 <div id="chat"></div>
 
 
 <span>文字の一部分</span>
 
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+
+const supabaseUrl = "https://wqhcznhalhpsxchkdauz.supabase.co/rest/v1/";
+const supabaseKey = "sb_publishable_MJMHNXpq8mx3WJ1TH5uuxw_PCMUiamL";
+
+const supabase = window.supabase.createClient(
+    supabaseUrl,
+    supabaseKey
+);
+
 const message = document.getElementById("message");
 const chat = document.getElementById("chat");
 
 
-    message.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-                    chat.innerHTML += "<p>" + message.value + "</p>";
-            message.value = "";
-        }
+// 保存されているメッセージを表示
+async function loadMessages() {
+
+    const { data, error } = await supabase
+        .from("message")
+        .select("*")
+        .order("id", { ascending: true });
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    chat.innerHTML = "";
+
+    data.forEach(function(row) {
+        chat.innerHTML += "<p>" + row.message + "</p>";
     });
+}
+
+
+// Enterでメッセージを保存
+message.addEventListener("keydown", async function(event) {
+
+    if (event.key === "Enter") {
+
+        const text = message.value;
+
+        if (text === "") {
+            return;
+        }
+
+        const { error } = await supabase
+            .from("message")
+            .insert({
+                message: text
+            });
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        message.value = "";
+
+        loadMessages();
+    }
+
+});
+
+
+loadMessages();
 
 </script>
 
