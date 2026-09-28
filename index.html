@@ -54,7 +54,7 @@ const chat = document.getElementById("chat");
 // 保存されているメッセージを表示
 async function loadMessages() {
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from("messages")
         .select("*")
         .order("id", { ascending: true });
