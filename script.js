@@ -11,7 +11,7 @@ const message = document.getElementById("message");
 const chat = document.getElementById("chat");
 
 
-// このブラウザ専用のID
+// ブラウザ専用のID
 let deviceId = localStorage.getItem("device_id");
 
 if (!deviceId) {
