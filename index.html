@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>自分のページ</title>
+</head>
+
+<body>
+<input type="checkbox">
+
+<h1>こんにちは</h1>
+<h2>これは小さい見出し</h2>
+
+<br>
+<hr>
+
+<h3>さらに小さい見出し</h3>
+
+
+<h1>映画</h1>
+<p>映画について書きます。</p>
+<p>最近見た映画です。<br>かなり面白かったです。</p>
+<hr>
+
+<img src="channels4_profile.jpg"></p>
+
+<strong>重要な文字</strong>
+
+<em>強調した文字</em>
+
+<p><input type="text" id="message" ></p>
+<div id="chat"></div>
+
+
+<span>文字の一部分</span>
+
+<script>
+const message = document.getElementById("message");
+const chat = document.getElementById("chat");
+
+
+    message.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+                    chat.innerHTML += "<p>" + message.value + "</p>";
+            message.value = "";
+        }
+    });
+
+</script>
+
+</body>
+</html>
