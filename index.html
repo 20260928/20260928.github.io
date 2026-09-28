@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>自分のページ</title>
+    <link rel="icon" href="icon.png">
 </head>
 
 <body>
@@ -27,7 +28,10 @@
 
 <em>強調した文字</em>
 
-<p><input type="text" id="message"></p>
+<p>
+    <input type="text" id="message">
+    <button id="send">Enter</button>
+</p>
 <div id="chat"></div>
 
 
@@ -57,7 +61,7 @@ async function loadMessages() {
     const { data, error } = await supabaseClient
         .from("messages")
         .select("*")
-        .order("id", { ascending: true });
+        .order("id", { ascending: false });
 
     if (error) {
         console.error(error);
@@ -67,38 +71,57 @@ async function loadMessages() {
     chat.innerHTML = "";
 
     data.forEach(function(row) {
-        chat.innerHTML += "<p>" + row.message + "</p>";
-    });
+    const date = new Date(row.created_at);
+
+    const dateText =
+        date.getFullYear() + "/" +
+        (date.getMonth() + 1) + "/" +
+        date.getDate() + " " +
+        String(date.getHours()).padStart(2, "0") + ":" +
+        String(date.getMinutes()).padStart(2, "0");
+
+    chat.innerHTML +=
+        "<p>" +
+        "<span>" + dateText + "</span> " +
+        row.message +
+        "</p>";
+});
 }
 
 
 // Enterでメッセージを保存
-message.addEventListener("keydown", async function(event) {
+async function sendMessage() {
 
-    if (event.key === "Enter") {
+    const text = message.value;
 
-        const text = message.value;
-
-        if (text === "") {
-            return;
-        }
-
-        const { error } = await supabaseClient
-            .from("messages")
-            .insert({
-                message: text
-            });
-
-        if (error) {
-            console.error(error);
-            return;
-        }
-
-        message.value = "";
-
-        loadMessages();
+    if (text === "") {
+        return;
     }
 
+    const { error } = await supabaseClient
+        .from("messages")
+        .insert({
+            message: text
+        });
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    message.value = "";
+
+    loadMessages();
+}
+
+message.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+});
+
+document.getElementById("send").addEventListener("click", function() {
+    sendMessage();
 });
 
 
