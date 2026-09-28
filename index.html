@@ -80,11 +80,14 @@ async function loadMessages() {
         String(date.getHours()).padStart(2, "0") + ":" +
         String(date.getMinutes()).padStart(2, "0");
 
-    chat.innerHTML +=
-        "<p>" +
-        "<span>" + dateText + "</span> " +
-        row.message +
-        "</p>";
+    const admin = localStorage.getItem("admin") === "true";
+
+chat.innerHTML +=
+    "<p>" +
+    "<span>" + dateText + "</span> " +
+    (admin ? "★ " : "") +
+    row.message +
+    "</p>";
 });
 }
 
@@ -98,6 +101,17 @@ async function sendMessage() {
         return;
     }
 
+    if (text === "/admin 1234") {
+        localStorage.setItem("admin", "true");
+        message.value = "";
+        return;
+    }
+
+    if (text === "/admin off") {
+    localStorage.removeItem("admin");
+    message.value = "";
+    return;
+}
     const { error } = await supabaseClient
         .from("messages")
         .insert({
