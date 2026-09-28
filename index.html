@@ -55,6 +55,15 @@ const message = document.getElementById("message");
 const chat = document.getElementById("chat");
 
 
+// この端末専用のIDを作る
+let deviceId = localStorage.getItem("device_id");
+
+if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("device_id", deviceId);
+}
+
+
 // 保存されているメッセージを表示
 async function loadMessages() {
 
@@ -71,28 +80,31 @@ async function loadMessages() {
     chat.innerHTML = "";
 
     data.forEach(function(row) {
-    const date = new Date(row.created_at);
 
-    const dateText =
-        date.getFullYear() + "/" +
-        (date.getMonth() + 1) + "/" +
-        date.getDate() + " " +
-        String(date.getHours()).padStart(2, "0") + ":" +
-        String(date.getMinutes()).padStart(2, "0");
+        const date = new Date(row.created_at);
 
-    const admin = localStorage.getItem("admin") === "true";
+        const dateText =
+            date.getFullYear() + "/" +
+            (date.getMonth() + 1) + "/" +
+            date.getDate() + " " +
+            String(date.getHours()).padStart(2, "0") + ":" +
+            String(date.getMinutes()).padStart(2, "0");
 
-chat.innerHTML +=
-    "<p>" +
-    "<span>" + dateText + "</span> " +
-    (admin ? "★ " : "") +
-    row.message +
-    "</p>";
-});
+        const isMine =
+            localStorage.getItem("admin") === "true" &&
+            row.device_id === deviceId;
+
+        chat.innerHTML +=
+            "<p>" +
+            "<span>" + dateText + "</span> " +
+            (isMine ? "★ " : "") +
+            row.message +
+            "</p>";
+    });
 }
 
 
-// Enterでメッセージを保存
+// メッセージを保存
 async function sendMessage() {
 
     const text = message.value;
@@ -101,21 +113,38 @@ async function sendMessage() {
         return;
     }
 
+
+    // 自分の端末として登録
     if (text === "/admin 1234") {
+
         localStorage.setItem("admin", "true");
+
         message.value = "";
+
+        loadMessages();
+
         return;
     }
 
+
+    // 自分の端末登録を解除
     if (text === "/admin off") {
-    localStorage.removeItem("admin");
-    message.value = "";
-    return;
-}
+
+        localStorage.removeItem("admin");
+
+        message.value = "";
+
+        loadMessages();
+
+        return;
+    }
+
+
     const { error } = await supabaseClient
         .from("messages")
         .insert({
-            message: text
+            message: text,
+            device_id: deviceId
         });
 
     if (error) {
@@ -128,20 +157,25 @@ async function sendMessage() {
     loadMessages();
 }
 
+
 message.addEventListener("keydown", function(event) {
+
     if (event.key === "Enter") {
         sendMessage();
     }
+
 });
 
+
 document.getElementById("send").addEventListener("click", function() {
+
     sendMessage();
+
 });
 
 
 loadMessages();
 
 </script>
-
 </body>
 </html>
