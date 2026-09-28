@@ -1,178 +1,32 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
-    <title>自分のページ</title>
-    <link rel="icon" href="icon.png">
+    <title>自分のサイト</title>
 </head>
 
 <body>
-<input type="checkbox">
 
-<h1>こんにちは</h1>
-<h2>これは小さい見出し</h2>
+    <input type="checkbox">
 
-<br>
-<hr>
+    <h1>タイトル</h1>
 
-<h3>さらに小さい</h3>
+    <img src="channels4_profile.jpg">
 
-<h1>映画</h1>
-<p>映画について書きます。</p>
-<p>最近見た映画です。<br>かなり面白かったです。</p>
-<hr>
+    <strong>重要な文字</strong>
+    <em>強調した文字</em>
 
-<img src="channels4_profile.jpg">
+    <p>
+        <input type="text" id="message">
+        <button id="send">Enter</button>
+    </p>
 
-<strong>重要な文字</strong>
-
-<em>強調した文字</em>
-
-<p>
-    <input type="text" id="message">
-    <button id="send">Enter</button>
-</p>
-<div id="chat"></div>
+    <div id="chat"></div>
 
 
-<span>文字の一部分</span>
+    <script src="script.js"></script>
 
-
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-
-const supabaseUrl = "https://wqhcznhalhpsxchkdauz.supabase.co";
-const supabaseKey = "sb_publishable_MJMHNXpq8mx3WJ1TH5uuxw_PCMUiamL";
-
-const supabaseClient = window.supabase.createClient(
-    supabaseUrl,
-    supabaseKey
-);
-
-const message = document.getElementById("message");
-const chat = document.getElementById("chat");
-
-
-// この端末専用のID
-let deviceId = localStorage.getItem("device_id");
-
-if (!deviceId) {
-    deviceId = crypto.randomUUID();
-    localStorage.setItem("device_id", deviceId);
-}
-
-
-// メッセージを表示
-async function loadMessages() {
-
-    const { data, error } = await supabaseClient
-        .from("messages")
-        .select("*")
-        .order("id", { ascending: false });
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    chat.innerHTML = "";
-
-    data.forEach(function(row) {
-
-        const date = new Date(row.created_at);
-
-        const dateText =
-            date.getFullYear() + "/" +
-            (date.getMonth() + 1) + "/" +
-            date.getDate() + " " +
-            String(date.getHours()).padStart(2, "0") + ":" +
-            String(date.getMinutes()).padStart(2, "0");
-
-        chat.innerHTML +=
-            "<p>" +
-            "<span>" + dateText + "</span> " +
-            (row.is_admin ? "★ " : "") +
-            row.message +
-            "</p>";
-    });
-}
-
-
-// メッセージを保存
-async function sendMessage() {
-
-    const text = message.value;
-
-    if (text === "") {
-        return;
-    }
-
-
-    // 自分の端末として登録
-    if (text === "/admin 1234") {
-
-        localStorage.setItem("admin", "true");
-
-        message.value = "";
-
-        return;
-    }
-
-
-    // 自分の端末登録を解除
-    if (text === "/admin off") {
-
-        localStorage.removeItem("admin");
-
-        message.value = "";
-
-        return;
-    }
-
-
-    const isAdmin =
-        localStorage.getItem("admin") === "true";
-
-
-    const { error } = await supabaseClient
-        .from("messages")
-        .insert({
-            message: text,
-            device_id: deviceId,
-            is_admin: isAdmin
-        });
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    message.value = "";
-
-    loadMessages();
-}
-
-
-message.addEventListener("keydown", function(event) {
-
-    if (event.key === "Enter") {
-        sendMessage();
-    }
-
-});
-
-
-document.getElementById("send").addEventListener("click", function() {
-
-    sendMessage();
-
-});
-
-
-loadMessages();
-
-</script>
 </body>
+
 </html>
