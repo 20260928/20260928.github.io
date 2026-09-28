@@ -44,7 +44,7 @@
 <script>
 
 const supabaseUrl = "https://wqhcznhalhpsxchkdauz.supabase.co";
-const supabaseKey = "sb_publishable_MJMHNXpq8mx3WJ1TH5uuxw_PCMUiamL";
+const supabaseKey = "あなたのPublishable key";
 
 const supabaseClient = window.supabase.createClient(
     supabaseUrl,
@@ -55,7 +55,7 @@ const message = document.getElementById("message");
 const chat = document.getElementById("chat");
 
 
-// この端末専用のIDを作る
+// この端末専用のID
 let deviceId = localStorage.getItem("device_id");
 
 if (!deviceId) {
@@ -64,7 +64,7 @@ if (!deviceId) {
 }
 
 
-// 保存されているメッセージを表示
+// メッセージを表示
 async function loadMessages() {
 
     const { data, error } = await supabaseClient
@@ -90,14 +90,10 @@ async function loadMessages() {
             String(date.getHours()).padStart(2, "0") + ":" +
             String(date.getMinutes()).padStart(2, "0");
 
-        const isMine =
-            localStorage.getItem("admin") === "true" &&
-            row.device_id === deviceId;
-
         chat.innerHTML +=
             "<p>" +
             "<span>" + dateText + "</span> " +
-            (isMine ? "★ " : "") +
+            (row.is_admin ? "★ " : "") +
             row.message +
             "</p>";
     });
@@ -121,8 +117,6 @@ async function sendMessage() {
 
         message.value = "";
 
-        loadMessages();
-
         return;
     }
 
@@ -134,17 +128,20 @@ async function sendMessage() {
 
         message.value = "";
 
-        loadMessages();
-
         return;
     }
+
+
+    const isAdmin =
+        localStorage.getItem("admin") === "true";
 
 
     const { error } = await supabaseClient
         .from("messages")
         .insert({
             message: text,
-            device_id: deviceId
+            device_id: deviceId,
+            is_admin: isAdmin
         });
 
     if (error) {
