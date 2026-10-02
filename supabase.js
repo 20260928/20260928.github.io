@@ -133,7 +133,8 @@ async function loadAccessCount() {
         return;
     }
 
-    document.getElementById("counter").textContent = data;
+    document.getElementById("counter").textContent =
+    String(data).padStart(6, "0");
 }
 
 loadAccessCount();
