@@ -121,3 +121,19 @@ document.getElementById("send").addEventListener("click", function() {
 
 // 最初に投稿を読み込む
 loadMessage();
+
+// アクセスカウンター
+async function loadAccessCount() {
+
+    const { data, error } =
+        await supabaseClient.rpc("increment_access_count");
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    document.getElementById("counter").textContent = data;
+}
+
+loadAccessCount();
