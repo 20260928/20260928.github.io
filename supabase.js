@@ -123,6 +123,7 @@ document.getElementById("send").addEventListener("click", function() {
 loadMessage();
 
 // 新しい投稿をリアルタイムで受け取る
+// 新しい投稿をリアルタイムで受け取る
 supabaseClient
     .channel("message-changes")
     .on(
@@ -132,14 +133,13 @@ supabaseClient
             schema: "public",
             table: "message"
         },
-        function(payload) {
-            console.log("新しい投稿を受信:", payload);
+        function() {
             loadMessage();
         }
     )
-    .subscribe(function(status) {
-        console.log("Realtime:", status);
-    });
+    .subscribe();
+
+
 // アクセスカウンター
 async function loadAccessCount() {
 
