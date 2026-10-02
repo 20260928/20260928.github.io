@@ -11,15 +11,6 @@ const message = document.getElementById("message");
 const chat = document.getElementById("chat");
 
 
-// ブラウザ専用のID
-let deviceId = localStorage.getItem("device_id");
-
-if (!deviceId) {
-    deviceId = crypto.randomUUID();
-    localStorage.setItem("device_id", deviceId);
-}
-
-
 // 投稿を読み込む
 async function loadMessages() {
 
@@ -96,7 +87,6 @@ async function sendMessage() {
         .from("messages")
         .insert({
             message: text,
-            device_id: deviceId,
             is_admin: isAdmin
         });
 
