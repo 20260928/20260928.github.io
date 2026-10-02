@@ -122,6 +122,22 @@ document.getElementById("send").addEventListener("click", function() {
 // 最初に投稿を読み込む
 loadMessage();
 
+// 新しい投稿をリアルタイムで受け取る
+supabaseClient
+    .channel("message-changes")
+    .on(
+        "postgres_changes",
+        {
+            event: "INSERT",
+            schema: "public",
+            table: "message"
+        },
+        function() {
+            loadMessage();
+        }
+    )
+    .subscribe();
+
 // アクセスカウンター
 async function loadAccessCount() {
 
