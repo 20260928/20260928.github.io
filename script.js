@@ -12,10 +12,10 @@ const chat = document.getElementById("chat");
 
 
 // 投稿を読み込む
-async function loadMessages() {
+async function loadMessage() {
 
     const { data, error } = await supabaseClient
-        .from("messages")
+        .from("message")
         .select("*")
         .order("id", { ascending: false });
 
@@ -84,7 +84,7 @@ async function sendMessage() {
 
 
     const { error } = await supabaseClient
-        .from("messages")
+        .from("message")
         .insert({
             message: text,
             is_admin: isAdmin
@@ -97,7 +97,7 @@ async function sendMessage() {
 
     message.value = "";
 
-    loadMessages();
+    loadMessage();
 }
 
 
@@ -120,4 +120,4 @@ document.getElementById("send").addEventListener("click", function() {
 
 
 // 最初に投稿を読み込む
-loadMessages();
+loadMessage();
