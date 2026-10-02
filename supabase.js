@@ -125,6 +125,26 @@ loadMessage();
 // アクセスカウンター
 async function loadAccessCount() {
 
+    const lastAccess = localStorage.getItem("lastAccess");
+    const now = Date.now();
+
+    if (lastAccess && now - Number(lastAccess) < 10 * 60 * 1000) {
+
+        const { data, error } =
+            await supabaseClient
+                .from("counter")
+                .select("count")
+                .eq("id", 1)
+                .single();
+
+        if (!error) {
+            document.getElementById("counter").textContent =
+                String(data.count).padStart(6, "0");
+        }
+
+        return;
+    }
+
     const { data, error } =
         await supabaseClient.rpc("increment_access_count");
 
@@ -134,7 +154,9 @@ async function loadAccessCount() {
     }
 
     document.getElementById("counter").textContent =
-    String(data).padStart(6, "0");
+        String(data).padStart(6, "0");
+
+    localStorage.setItem("lastAccess", now);
 }
 
 loadAccessCount();
