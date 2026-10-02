@@ -132,12 +132,14 @@ supabaseClient
             schema: "public",
             table: "message"
         },
-        function() {
+        function(payload) {
+            console.log("新しい投稿を受信:", payload);
             loadMessage();
         }
     )
-    .subscribe();
-
+    .subscribe(function(status) {
+        console.log("Realtime:", status);
+    });
 // アクセスカウンター
 async function loadAccessCount() {
 
