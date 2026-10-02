@@ -126,21 +126,16 @@ loadMessage();
 async function loadAccessCount() {
 
     const lastAccess = localStorage.getItem("lastAccess");
+    const savedCount = localStorage.getItem("savedCount");
     const now = Date.now();
 
-    if (lastAccess && now - Number(lastAccess) < 10 * 60 * 1000) {
-
-        const { data, error } =
-            await supabaseClient
-                .from("counter")
-                .select("count")
-                .eq("id", 1)
-                .single();
-
-        if (!error) {
-            document.getElementById("counter").textContent =
-                String(data.count).padStart(6, "0");
-        }
+    if (
+        lastAccess &&
+        savedCount &&
+        now - Number(lastAccess) < 10 * 60 * 1000
+    ) {
+        document.getElementById("counter").textContent =
+            String(savedCount).padStart(6, "0");
 
         return;
     }
@@ -157,6 +152,7 @@ async function loadAccessCount() {
         String(data).padStart(6, "0");
 
     localStorage.setItem("lastAccess", now);
+    localStorage.setItem("savedCount", data);
 }
 
 loadAccessCount();
