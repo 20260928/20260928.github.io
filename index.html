@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!-- トップページ: 画像・コメント(チャット)欄・管理者用の日記投稿欄を持つ。 -->
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>自分のサイト</title>
+    <!-- タブに表示されるサイトアイコン -->
+    <link rel="icon" type="image/png" href="images/site-icon.png">
+    <!-- 描画前に実行するスクリプト。前回保存したコメント欄の高さをCSS変数に反映し、
+         コメント読込完了までレイアウトが動かないよう領域を確保する(comments.jsと対になる処理)。 -->
+    <script>
+        (function () {
+            const layoutHeight = sessionStorage.getItem(
+                "message-layout-reserved-height"
+            );
+            const inputHeight = sessionStorage.getItem(
+                "message-input-reserved-height"
+            );
+            if (layoutHeight !== null && inputHeight !== null) {
+                document.documentElement.classList.add(
+                    "message-layout-size-reserved"
+                );
+                document.documentElement.style.setProperty(
+                    "--message-layout-reserved-height",
+                    layoutHeight
+                );
+                document.documentElement.style.setProperty(
+                    "--message-input-reserved-height",
+                    inputHeight
+                );
+            }
+        })();
+    </script>
+    <!-- 全ページ共通のスタイルシート -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="page-layout">
+        <div id="page-content">
+
+            <!-- 上部のメイン画像。画像上の透明リンク(diary-image-link)から日記ページへ移動できる。 -->
+            <div id="site-image-container">
+                <img id="site-image" src="images/BOaSOESCQAIaxC-.jpg" alt="">
+                <a id="diary-image-link" href="diary.html" aria-label="日記">日記</a>
+            </div>
+
+            <!-- コメント一覧と投稿フォームをまとめた領域 -->
+            <div id="message-layout">
+                <!-- コメント一覧。comments.js が投稿を描画する。 -->
+                <div id="chat"></div>
+                <div id="message-form">
+                    <!-- コメント入力欄(管理者モードでは日記本文の入力にも使う) -->
+                    <textarea id="message" rows="6"></textarea>
+                    <div id="message-actions">
+
+                        <!-- 管理者(/admin 入力後)にだけ表示される日記投稿用コントロール。diary.js が表示を切り替える。 -->
+                        <div id="admin-diary-controls" hidden>
+                            <input id="diary-title" type="text" aria-label="日記タイトル">
+                            <span id="diary-confirm-question" hidden>日記を送信しますか？</span>
+                            <button id="diary-send" type="button">日記</button>
+                            <button id="diary-confirm-no" type="button" hidden>いいえ</button>
+                        </div>
+
+                        <!-- コメント送信ボタン。日記確認中は「はい」ボタンに入れ替わる。 -->
+                        <div id="message-submit-controls">
+                            <button id="send">送信</button>
+                            <button id="diary-confirm-yes" type="button" hidden>はい</button>
+                        </div>
+
+                        <!-- 日記投稿の結果メッセージ(スクリーンリーダーにも通知される) -->
+                        <p id="diary-status" aria-live="polite"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">2026年9月28日作成</footer>
+
+    <!-- 読込順が重要: ①supabase-jsライブラリ ②接続設定 ③日記(isAdminModeを定義) ④コメント(isAdminModeを利用) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="diary.js"></script>
+    <script src="comments.js"></script>
+</body>
+
+</html>

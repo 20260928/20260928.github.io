@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!-- 日記ページ: 左に日付一覧、中央に選択中の日記、右にプロフィールを表示する3カラム構成。 -->
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>日記 - 自分のサイト</title>
+    <link rel="icon" type="image/png" href="images/site-icon.png">
+    <!-- 全ページ共通のスタイルシート -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ページ上部の画像。画像上の透明リンクからトップ(チャット)へ戻れる。 -->
+    <div id="diary-header-image-frame">
+        <img id="diary-header-image" src="images/BOaYX6sCEAAzgW8.jpg" alt="">
+        <a id="diary-back-link" href="index.html" aria-label="戻る">戻る</a>
+    </div>
+
+    <main id="diary-section">
+        <!-- 左カラム: 日記の日付ボタン一覧。diary.js が読込後にliを生成する。 -->
+        <aside id="diary-archive" aria-label="日記の日付一覧">
+            <nav aria-label="日付から日記を選択">
+                <ol id="diary-date-list"></ol>
+            </nav>
+        </aside>
+        <!-- 中央カラム: 選択中の日記本文 -->
+        <section id="diary-view" aria-label="選択中の日記">
+            <!-- 前後の日記へ移動するボタン。日記が読み込まれるまで非表示。 -->
+            <nav class="diary-entry-navigation" aria-label="日記の移動" hidden>
+                <button type="button" data-diary-direction="previous">◀</button>
+                <button type="button" data-diary-direction="next">▶</button>
+            </nav>
+            <!-- 日記1件分の表示先 -->
+            <div id="diary-list"></div>
+            <!-- 読込失敗・日記なし等のメッセージ表示先 -->
+            <p id="diary-load-status" aria-live="polite"></p>
+        </section>
+        <!-- 右カラム: 固定のプロフィール情報 -->
+        <aside id="diary-profile" aria-label="プロフィール">
+            <div class="diary-profile-image-frame">
+                <img src="images/monkey-monkey-suspicious.gif" alt="プロフィール画像">
+            </div>
+            <dl class="diary-profile-details">
+                <div>
+                    <dt>名前</dt>
+                    <dd>廣田 聖</dd>
+                </div>
+                <div>
+                    <dt>生年月日</dt>
+                    <dd>2000年1月2日</dd>
+                </div>
+            </dl>
+        </aside>
+    </main>
+
+    <!-- ①supabase-jsライブラリ ②接続設定 ③日記の読込・表示処理(この順で読み込む) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="diary.js"></script>
+</body>
+
+</html>
