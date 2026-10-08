@@ -35,7 +35,7 @@ const diaryImageWidth = 360;
 const diaryImageHeight = 270;
 const diaryImageQuality = 0.75;
 
-// 日記タイトル(例: 2026/10/05(月) 12:00:00)から画像ファイル名用の日付(例: 261005)を作る。
+// 日記タイトル(例: 2026/10/05 12:00:00)から画像ファイル名用の日付(例: 261005)を作る。
 // 日付として読めないタイトルは null を返し、画像なし扱いにする。
 function getDiaryImageDate(title) {
     // タイトルの日付を画像ファイル名用のYYMMDD形式にする。
@@ -152,14 +152,13 @@ window.isAdminMode = function () {
     return localStorage.getItem("admin") === "true";
 };
 
-// 日記タイトルの初期値を「2026/10/05(月) 12:00:00」の形式で作る。
+// 日記タイトルの初期値を「2026/10/05 12:00:00」の形式で作る。
 function formatDiaryTitleDate(date) {
-    const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
     return (
         date.getFullYear() + "/" +
         String(date.getMonth() + 1).padStart(2, "0") + "/" +
         String(date.getDate()).padStart(2, "0") +
-        "(" + weekdays[date.getDay()] + ") " +
+        " " +
         String(date.getHours()).padStart(2, "0") + ":" +
         String(date.getMinutes()).padStart(2, "0") + ":" +
         String(date.getSeconds()).padStart(2, "0")
@@ -314,8 +313,8 @@ function renderDiarySelection(index) {
             : "";
         button.hidden = !hasDestination;
         button.textContent = direction === "previous"
-            ? `◀ ${title}`
-            : `${title} ▶`;
+            ? `◂ ${title}`
+            : `${title} ▸`;
     });
     diaryEntryNavigation.classList.toggle(
         "diary-entry-navigation-latest",
