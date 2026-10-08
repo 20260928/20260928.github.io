@@ -190,7 +190,7 @@ function updateDiaryControls() {
     }
 }
 
-// 管理者モードのON/OFFを保存して画面に反映する(comments.js の /admin コマンドから呼ばれる)。
+// 管理者モードのON/OFFを保存して画面に反映する(comments.js の admin コマンドから呼ばれる)。
 window.setAdminMode = function (enabled) {
     if (enabled) {
         localStorage.setItem("admin", "true");

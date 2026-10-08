@@ -595,6 +595,19 @@ async function sendMessage() {
     loadMessage();
 }
 
+function handleAdminCommand() {
+    const command = message.value.trim();
+    if (command !== "admin" && command !== "admin off") {
+        return false;
+    }
+
+    // 専用コマンドで管理者モードを切り替え、コマンド自体は投稿しない。
+    window.setAdminMode(command === "admin");
+    message.value = "";
+    matchMessageInputToComments();
+    return true;
+}
+
 message.addEventListener("input", function () {
     // 管理者は複数行を利用できるが、一般投稿は改行を禁止する。
     if (window.isAdminMode() || !/[\r\n]/.test(message.value)) {
@@ -620,13 +633,8 @@ message.addEventListener("keydown", function (event) {
         return;
     }
 
-    const command = message.value.trim();
-    if (command === "admin" || command === "admin off") {
-        // 専用コマンドで管理者モードを切り替え、コマンド自体は投稿しない。
+    if (handleAdminCommand()) {
         event.preventDefault();
-        window.setAdminMode(command === "admin");
-        message.value = "";
-        matchMessageInputToComments();
         return;
     }
 
@@ -648,7 +656,10 @@ message.addEventListener("keydown", function (event) {
 });
 
 document.getElementById("send").addEventListener("click", function () {
-    // 送信ボタンからも、Enter送信と同じ関数を実行する。
+    // 送信ボタンからも管理者切替コマンドを認識してから通常投稿を試す。
+    if (handleAdminCommand()) {
+        return;
+    }
     sendMessage();
 });
 
