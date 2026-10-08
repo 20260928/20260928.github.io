@@ -358,7 +358,7 @@ body:not(.comments-ready) #message {
 
 .chat-message.admin-post .chat-message-date {
 
-    color: #000000;
+    color: #404040;
 }
 
 /* ===== 過去コメントの折りたたみグループ(detailsタグ) ===== */
