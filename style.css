@@ -898,4 +898,13 @@ body:not(.comments-ready) #message {
         flex: 0 1 calc((100% - 8px) / 2);
         margin-left: auto;
     }
+
+    .chat-message-admin {
+        font-size: 0;
+    }
+
+    .chat-message-admin::before {
+        content: "🩲";
+        font-size: 11px;
+    }
 }

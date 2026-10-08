@@ -621,10 +621,10 @@ message.addEventListener("keydown", function (event) {
     }
 
     const command = message.value.trim();
-    if (command === "/admin" || command === "/admin off") {
+    if (command === "admin" || command === "admin off") {
         // 専用コマンドで管理者モードを切り替え、コマンド自体は投稿しない。
         event.preventDefault();
-        window.setAdminMode(command === "/admin");
+        window.setAdminMode(command === "admin");
         message.value = "";
         matchMessageInputToComments();
         return;
