@@ -35,8 +35,10 @@
             }
         })();
     </script>
-    <!-- 全ページ共通のスタイルシート -->
+    <!-- 共通スタイルとトップページ専用スタイル -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="mobile.css" media="(max-width: 700px)">
 </head>
 
 <body>
@@ -80,8 +82,6 @@
             </div>
         </div>
     </div>
-
-    <footer class="site-footer">2026年9月28日</footer>
 
     <!-- 読込順が重要: ①supabase-jsライブラリ ②接続設定 ③日記(isAdminModeを定義) ④コメント(isAdminModeを利用) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -1,0 +1,427 @@
+/* スマートフォン表示(全ページ共通)。HTML側で media="(max-width: 700px)" を指定して読み込む。
+   セクション: 共通 / トップページ / 日記ページ */
+
+/* ===== 共通 ===== */
+
+/* PC用のフォント(MS Pゴシック)ではなく、iOS標準のフォントを使う。 */
+body,
+button,
+input,
+textarea {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+}
+
+/* PC用の横幅固定を外し、文字を小さめにして画面幅に収める。 */
+body {
+    min-width: 0;
+    margin: 0;
+    font-size: 12px;
+}
+
+/* 背景画像は画面に固定した1枚にする。ページの長さに左右されず、トップと日記で同じ見え方になる。 */
+html {
+    background: #ffffff;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: none;
+    }
+
+    body {
+    background: transparent;
+}
+
+/* ===== トップページ ===== */
+
+/* コメント読込前も入力欄の高さを固定し、レイアウトのずれを防ぐ。 */
+body:not(.comments-ready) #message {
+    height: 8em;
+    min-height: 8em;
+}
+
+/* 画像・入力欄・コメントを左右余白なしの縦並びにする。 */
+#page-layout {
+    width: 100%;
+    margin: 0 auto 8px;
+}
+
+/* ヘッダー画像と日記リンクを4等分グリッドに配置(リンクは左端の列の中央)。 */
+#site-image-container {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0 auto 12px;
+}
+
+/* ヘッダーに日付の文字を表示する(トップと日記)。 */
+#site-image-container::before,
+#diary-header-image-frame::before {
+    content: "20260928";
+    grid-column: 1 / -1;
+    grid-row: 1;
+    text-align: center;
+    font-size: 40px;
+    font-weight: bold;
+    line-height: 1.2;
+    padding: 16px 0;
+}
+
+#site-image {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    /* ヘッダー画像は一時的に非表示。再表示するには次の1行を削除する。 */
+    display: none;
+}
+
+/* 入力欄とコメント欄を縦に積む。 */
+#message-layout {
+    flex-direction: column;
+    gap: 0;
+    padding: 0 8px 8px;
+}
+
+/* コメント欄は入力欄の下に表示し、内部スクロールなしで内容なりに伸ばす。 */
+#chat {
+    order: 1;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 8px 0 0;
+}
+
+/* 入力フォームをコメント欄より上に表示する。 */
+#message-form {
+    order: 0;
+    flex: 0 0 auto;
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 8px 0 12px;
+}
+
+/* 16px未満だとiPhoneのSafariがフォーカス時に拡大するため、入力欄だけ16pxにする。 */
+#message {
+    height: 8em;
+    min-height: 8em;
+    font-size: 16px;
+}
+
+/* 管理者投稿の目印を🌎から🩲に差し替える(元の文字は非表示)。 */
+.chat-message-admin {
+    font-size: 0;
+}
+
+.chat-message-admin::before {
+    content: "\1FA72";
+    font-size: 10px;
+}
+
+/* 画像上の透明リンクをやめ、画像下の白い部分に通常のリンクとして表示する。 */
+#diary-image-link {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
+    position: static;
+    display: block;
+    width: fit-content;
+    height: auto;
+    margin: 8px 0 0;
+    font-size: inherit;
+}
+
+/* 日記の状態メッセージは長くても折り返して画面内に収める。 */
+#diary-status {
+    max-width: 100%;
+    white-space: normal;
+}
+
+/* ===== 文字色 =====
+   文字を黒にする。リンクとボタンは元の青のまま。 */
+body,
+#message-layout,
+#chat,
+#message-form,
+.diary-entry-header,
+.diary-entry-content,
+.diary-entry-images,
+.diary-image-error,
+.chat-message-date,
+.chat-message.admin-post .chat-message-content,
+.chat-message.admin-post .chat-message-date,
+#message,
+#diary-title {
+    color: #000000;
+}
+
+#message,
+#diary-title {
+    caret-color: #000000;
+}
+
+/* ===== シンプル表示(装飾の打ち消し) =====
+   PC用のグレーの立体パネル・凸凹の枠線・影をスマホでは使わず、日記リンクのような白地の素朴な見た目にする。
+   枠線は太さを残して透明にし、配置が動かないようにする。 */
+
+#message-layout,
+#chat,
+#message-form,
+.diary-entry-header,
+.diary-entry-content,
+.diary-entry-images,
+.diary-image-error {
+    background: transparent;
+    border: 2px solid transparent;
+    box-shadow: none;
+}
+
+/* 入力欄は背景画像が透けるよう透明にし、書き込む場所が分かる細い線だけ残す。 */
+#message,
+#diary-title {
+    background: transparent;
+    border: 1px solid #808080;
+}
+
+/* チャット履歴は入力欄と同じ細い線で囲む。 */
+#chat {
+    border: 1px solid #808080;
+}
+
+/* ボタンと過去コメントの見出しは、リンクと同じ青の下線付きテキストにする。
+   余白・最小サイズをなくし、クリック範囲を文字だけにする。 */
+#send,
+#diary-send,
+#diary-confirm-yes,
+#diary-confirm-no,
+.chat-message-group summary,
+.diary-entry-navigation button {
+    width: auto;
+    min-height: 0;
+    padding: 0;
+    color: #0000ee;
+    font-weight: normal;
+    text-decoration: underline;
+    background: transparent;
+    border: 0;
+}
+
+/* 過去コメントの見出しはクリック範囲を文字(▶と日時)だけにする。 */
+.chat-message-group summary {
+    width: fit-content;
+}
+
+/* 押した時のへこみ・ずれも無効にする。 */
+#send:active,
+#diary-send:active,
+#diary-confirm-yes:active,
+#diary-confirm-no:active,
+.chat-message-group summary:active,
+.diary-entry-navigation button:active {
+    border-style: solid;
+    transform: none;
+}
+
+/* クリック・タップ時の点線(フォーカス枠)とタップ時の色も出さない。 */
+#send,
+#diary-send,
+#diary-confirm-yes,
+#diary-confirm-no,
+.chat-message-group summary,
+.diary-entry-navigation button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+#send:focus,
+#diary-send:focus,
+#diary-confirm-yes:focus,
+#diary-confirm-no:focus,
+.chat-message-group summary:focus,
+.diary-entry-navigation button:focus {
+    outline: none;
+}
+
+/* ボタンも日記リンクも、押している間は標準リンクと同じ赤にする。 */
+#send:active,
+#diary-send:active,
+#diary-confirm-yes:active,
+#diary-confirm-no:active,
+.chat-message-group summary:active,
+.diary-entry-navigation button:active {
+    color: #ee0000;
+}
+
+#diary-image-link,
+#diary-back-link {
+    -webkit-tap-highlight-color: transparent;
+}
+
+#diary-image-link:focus,
+#diary-back-link:focus {
+    outline: none;
+}
+
+/* 過去コメントの開始日時や管理者マークの太字を解除する。 */
+.chat-message-group-date,
+.chat-message-admin {
+    font-weight: normal;
+}
+
+/* ===== 日記ページ ===== */
+
+/* ヘッダー画像と戻るリンクを4等分グリッドに配置(トップの日記リンクと同じ位置)。 */
+#diary-header-image-frame {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    aspect-ratio: auto;
+    margin: 0 auto 12px;
+}
+
+/* 画像はPC表示と同じ縦横比のまま幅いっぱいに表示する。 */
+#diary-header-image {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    height: auto;
+    aspect-ratio: 680 / 338;
+    /* ヘッダー画像は一時的に非表示。再表示するには次の1行を削除する。 */
+    display: none;
+}
+
+/* 画像上の透明リンクをやめ、画像下の白い部分に通常のリンクとして表示する。 */
+#diary-back-link {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
+    position: static;
+    display: block;
+    width: fit-content;
+    height: auto;
+    margin: 8px 0 0;
+    font-size: inherit;
+}
+
+/* 3カラムを1カラムにして縦に並べる。 */
+#diary-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    width: calc(100% - 16px);
+    margin: 12px auto;
+}
+
+#diary-archive,
+#diary-view,
+#diary-profile {
+    grid-column: 1;
+    grid-row: auto;
+}
+
+#diary-profile {
+    order: -1;
+}
+
+/* 日付一覧はスマホでは表示しない(前後ボタンで移動する)。 */
+#diary-archive {
+    display: none;
+}
+
+#diary-date-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 8px;
+}
+
+.diary-date-link {
+    min-height: 36px;
+    overflow-wrap: anywhere;
+}
+
+/* プロフィールのレイアウト。最後のdisplay: noneでスマホでは非表示にする(後に書いたものが優先される)。 */
+#diary-profile {
+    display: grid;
+    grid-template-columns: 72px max-content;
+    align-items: center;
+    gap: 12px;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+    display: none;
+}
+
+/* 名前と生年月日のラベル幅をそろえる(「名前」は両端揃えで3文字幅に広げる)。 */
+.diary-profile-details {
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+}
+
+.diary-profile-details div {
+    grid-template-columns: 4em max-content;
+}
+
+.diary-profile-details dt {
+    width: 4em;
+    box-sizing: border-box;
+}
+
+.diary-profile-details div:first-child dt {
+    text-align: justify;
+    text-align-last: justify;
+}
+
+.diary-profile-details dd {
+    white-space: normal;
+    text-align: left;
+}
+
+/* 日記(日付・本文・画像)はチャット履歴と同じ細い線で囲む。 */
+.diary-entry {
+    border: 1px solid #808080;
+}
+
+/* 日記の見出し(日付など)は幅が足りなければ折り返す。 */
+.diary-entry-header {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+}
+
+.diary-entry-date {
+    flex: 1 1 auto;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* 日記内の画像は横並びにせず1列で表示する。 */
+.diary-entry-image-grid {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* 前後の移動ボタンはクリック範囲を文字だけにする(余白・最小高さなし、幅は文字なり)。 */
+.diary-entry-navigation {
+    flex-wrap: nowrap;
+}
+
+.diary-entry-navigation button {
+    flex: 0 1 auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.diary-entry-navigation [data-diary-direction="previous"],
+.diary-entry-navigation [data-diary-direction="next"] {
+    margin: 0;
+}
+
+/* 最新・最古の日記では片方のボタンだけになるため、左右に寄せる。
+   最新は「古い方へ」を左、最古は「新しい方へ」を右に置く。 */
+.diary-entry-navigation-latest [data-diary-direction="previous"] {
+    margin-right: auto;
+}
+
+.diary-entry-navigation-oldest [data-diary-direction="next"] {
+    margin-left: auto;
+}

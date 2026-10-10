@@ -1,0 +1,264 @@
+/* ===== 日記ページ ===== */
+
+/* 3カラム: 日付一覧(左) / 日記本文(中央・最大561px) / プロフィール(右)。 */
+#diary-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 561px) minmax(0, 1fr);
+    gap: 16px;
+    width: min(calc(100% - 32px), 984px);
+    margin: 24px auto;
+}
+
+/* 左カラム: 日付一覧。 */
+#diary-archive {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    min-width: 0;
+}
+
+#diary-archive h2 {
+    margin: 0 0 8px;
+    font-size: 1em;
+}
+
+/* 日付ボタンを縦に並べる(番号なしリスト)。 */
+#diary-date-list {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* 日付ボタンは見た目をリンク風(青の下線付き)にする。 */
+.diary-date-link {
+    padding: 2px 0;
+    color: #0000ee;
+    text-align: left;
+    text-decoration: underline;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+/* 表示中の日付(diary.jsが aria-current を付ける)は、黒の太字・下線なしで強調する。
+   hover等でも色が変わらないよう状態ごとに指定している。 */
+#diary-date-list .diary-date-link[aria-current="date"],
+#diary-date-list .diary-date-link[aria-current="date"]:hover,
+#diary-date-list .diary-date-link[aria-current="date"]:focus,
+#diary-date-list .diary-date-link[aria-current="date"]:active {
+    color: #000000;
+    -webkit-text-fill-color: #000000;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* 中央カラム: 選択中の日記。 */
+#diary-view {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+}
+
+/* 前へ/次へボタンの行。前を左端、次を右端に配置する。 */
+.diary-entry-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* display:flex より hidden 属性を優先して隠す。 */
+.diary-entry-navigation[hidden] {
+    display: none;
+}
+
+.diary-entry-navigation button {
+    min-height: 36px;
+    padding: 8px 12px;
+    color: #000000;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    cursor: pointer;
+}
+
+.diary-entry-navigation [data-diary-direction="previous"] {
+    margin-right: auto;
+}
+
+.diary-entry-navigation [data-diary-direction="next"] {
+    margin-left: auto;
+}
+
+.diary-entry-navigation button:active {
+    border-style: inset;
+    transform: translate(2px, 2px);
+}
+
+/* ナビゲーションが日記の上に来る時だけ下に余白を空ける。 */
+.diary-entry-navigation:first-child {
+    margin-bottom: 12px;
+}
+
+/* 右カラム: プロフィール。最大176px幅で右寄せ。 */
+#diary-profile {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+    min-width: 0;
+    width: min(100%, 176px);
+    margin-left: auto;
+    box-sizing: border-box;
+    padding: 8px;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+}
+
+/* プロフィール画像の枠。正方形に切り抜いて表示する。 */
+.diary-profile-image-frame {
+    position: relative;
+    width: 100%;
+    margin-left: auto;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+/* 画像を少し拡大して上にずらし、見せたい部分(顔まわり)が正方形枠に入るように位置調整している。 */
+.diary-profile-image-frame img {
+    position: absolute;
+    top: -47.3%;
+    left: 50%;
+    display: block;
+    width: 110%;
+    height: auto;
+    transform: translateX(-50%);
+}
+
+/* 名前・生年月日などの項目リスト。項目名を左、値を右に揃える。 */
+.diary-profile-details {
+    display: grid;
+    gap: 6px;
+    margin: 8px 0 0;
+    padding-top: 8px;
+}
+
+.diary-profile-details div {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 8px;
+}
+
+.diary-profile-details dt {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.diary-profile-details dd {
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* ヘッダー画像全体に重ねた透明リンク。画像をクリックするとトップへ戻る。 */
+#diary-back-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 0;
+}
+
+#diary-back-link:focus-visible {
+    outline: 2px solid #000000;
+    outline-offset: 2px;
+}
+
+/* ヘッダー画像の枠。縦横比680:338を保って幅いっぱいに表示する。 */
+#diary-header-image-frame {
+    position: relative;
+    display: block;
+    width: min(calc(100% - 32px), 984px);
+    aspect-ratio: 680 / 338;
+    margin: 24px auto;
+}
+
+#diary-header-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+}
+
+/* ===== 日記1件の表示(diary.js が生成) ===== */
+
+/* 日付ヘッダー → 本文 → 画像 を縦に積む。 */
+.diary-entry {
+    display: grid;
+    gap: 0;
+    margin: 0;
+}
+
+.diary-entry-header {
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    color: #000000;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+}
+
+/* 日付文字。折り返さず右寄せ。 */
+.diary-entry-date {
+
+    flex: 0 0 auto;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* 日記本文。改行をそのまま表示し、行間を広めにする。 */
+.diary-entry-content {
+
+    padding: 8px 10px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+}
+
+/* 日記に添付された画像を入れる枠。 */
+.diary-entry-images {
+
+    padding: 8px;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+}
+
+/* 画像を2列のグリッドで並べる。 */
+.diary-entry-image-grid {
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: center;
+    gap: 8px;
+}
+
+.diary-entry-image-grid img {
+
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* 画像の縮小に失敗した時のエラー表示。 */
+.diary-image-error {
+
+    margin: 0;
+    padding: 8px 10px;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+}
