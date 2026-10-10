@@ -101,11 +101,11 @@ body:not(.comments-ready) #message {
     padding: 8px 0 12px;
 }
 
-/* 入力欄もPC表示と同じ文字サイズにそろえる。 */
+/* iPhoneのSafariがフォーカス時に拡大しないよう、チャット入力欄は16pxにする。 */
 #message {
     height: 8em;
     min-height: 8em;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 /* 管理者投稿の目印を🌎から🩲に差し替える(元の文字は非表示)。 */
