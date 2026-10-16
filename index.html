@@ -1,17 +1,15 @@
 <!DOCTYPE html>
-<!-- トップページ: 画像・コメント(チャット)欄・管理者用の日記投稿欄を持つ。 -->
+<!-- トップページ: 日記本文 -->
 <html>
 
 <head>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>20260928</title>
-    <!-- タブに表示されるサイトアイコン -->
+    <meta name="viewport" content="width=512, initial-scale=1">
+    <title>日記 - 自分のサイト</title>
     <link rel="icon" type="image/png" href="images/site-icon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-    <!-- 描画前に実行するスクリプト。前回保存したコメント欄の高さをCSS変数に反映し、
-         コメント読込完了までレイアウトが動かないよう領域を確保する(comments.jsと対になる処理)。 -->
+    <!-- 描画前にコメント欄の予約サイズを復元し、読込中のレイアウト移動を防ぐ -->
     <script>
         (function () {
             const layoutHeight = sessionStorage.getItem(
@@ -35,59 +33,61 @@
             }
         })();
     </script>
-    <!-- 共通スタイルとトップページ専用スタイル -->
-    <link rel="stylesheet" href="style.css">
+    <!-- 共通スタイルと日記ページ専用スタイル -->
     <link rel="stylesheet" href="index.css">
-    <link rel="stylesheet" href="mobile.css" media="(max-width: 700px)">
 </head>
 
 <body>
 
-    <div id="page-layout">
-        <div id="page-content">
+    <main id="diary-section">
+        <!-- 日記本文 -->
+        <section id="diary-view" aria-label="選択中の日記">
+            <!-- 前後の日記へ移動するボタン。日記が読み込まれるまで非表示。 -->
+            <nav class="diary-entry-navigation" aria-label="日記の移動" hidden>
+                <button type="button" data-diary-direction="previous">◂</button>
+                <button type="button" data-diary-direction="next">▸</button>
+                <button id="diary-add" type="button" hidden>追加</button>
+            </nav>
+            <!-- 日記1件分の表示先 -->
+            <div id="diary-list"></div>
+            <!-- 読込失敗・日記なし等のメッセージ表示先 -->
+            <p id="diary-load-status" aria-live="polite"></p>
+        </section>
+    </main>
+    </main>
 
-            <!-- 上部のメイン画像。画像上の透明リンク(diary-image-link)から日記ページへ移動できる。 -->
-            <div id="site-image-container">
-                <img id="site-image" src="images/BOaSOESCQAIaxC-.jpg" alt="">
-                <a id="diary-image-link" href="diary.html" aria-label="日記">日記</a>
-            </div>
-
-            <!-- コメント一覧と投稿フォームをまとめた領域 -->
-            <div id="message-layout">
-                <!-- コメント一覧。comments.js が投稿を描画する。 -->
-                <div id="chat"></div>
-                <div id="message-form">
-                    <!-- コメント入力欄(管理者モードでは日記本文の入力にも使う) -->
-                    <textarea id="message" rows="6"></textarea>
-                    <div id="message-actions">
-
-                        <!-- 管理者(/admin 入力後)にだけ表示される日記投稿用コントロール。diary.js が表示を切り替える。 -->
-                        <div id="admin-diary-controls" hidden>
-                            <input id="diary-title" type="text" aria-label="日記タイトル">
-                            <span id="diary-confirm-question" hidden>日記を送信しますか？</span>
-                            <button id="diary-send" type="button">日記</button>
-                            <button id="diary-confirm-no" type="button" hidden>いいえ</button>
-                        </div>
-
-                        <!-- コメント送信ボタン。日記確認中は「はい」ボタンに入れ替わる。 -->
-                        <div id="message-submit-controls">
-                            <button id="send">送信</button>
-                            <button id="diary-confirm-yes" type="button" hidden>はい</button>
-                        </div>
-
-                        <!-- 日記投稿の結果メッセージ(スクリーンリーダーにも通知される) -->
-                        <p id="diary-status" aria-live="polite"></p>
+    <!-- 日記の下にコメント一覧と投稿欄を表示する -->
+    <section id="message-section" aria-label="コメント">
+        <div id="message-layout">
+            <div id="message-form">
+                <textarea id="message" rows="4" aria-label="コメント"></textarea>
+                <div id="message-actions">
+                    <div id="message-submit-controls">
+                        <button id="send" type="button">送信</button>
                     </div>
                 </div>
             </div>
+            <div id="chat" aria-label="コメント一覧"></div>
+            <div id="chat-older-messages" class="chat-older-messages" aria-label="過去のコメント"></div>
         </div>
-    </div>
+    </section>
 
-    <!-- 読込順が重要: ①supabase-jsライブラリ ②接続設定 ③日記(isAdminModeを定義) ④コメント(isAdminModeを利用) -->
+    <!-- 読込順: Supabaseライブラリ → 接続設定 → 日記 → コメント -->
+    <script>
+        (function () {
+            const readySections = new Set();
+            window.markPageSectionReady = function (section) {
+                readySections.add(section);
+                if (readySections.has("diary") && readySections.has("comments")) {
+                    document.body.classList.add("page-sections-ready");
+                }
+            };
+        })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <script src="diary.js"></script>
-    <script src="comments.js"></script>
+    <script src="comment.js"></script>
 </body>
 
 </html>

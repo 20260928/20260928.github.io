@@ -1,385 +1,360 @@
-/* ===== トップページ全体のレイアウト ===== */
+/* ==================================================
+   共通スタイル
+   ================================================== */
 
-/* 中央寄せの984px幅の1カラム。 */
-#page-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 984px);
-    gap: 16px;
-    align-items: start;
-    width: min(100%, 984px);
-    margin: 24px auto;
+/* ページ全体の基本設定 */
+body {
+    min-width: 320px;
+    font-family: "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+    font-size: 14px;
+    color: #000000;
+    background-color: #ffffff;
 }
 
-/* min-width:0 でgrid内の子が中身に押されて横にはみ出すのを防ぐ。 */
-#page-content {
-    min-width: 0;
+/* フォーム部品も本文と同じフォント・サイズにそろえる */
+button,
+input,
+textarea {
+    font: inherit;
 }
 
-/* メイン画像を包む枠。内側の透明リンクを画像上に重ねるため position:relative にする。 */
-#site-image-container {
-    position: relative;
-    width: 100%;
-    margin: 0 auto 24px;
-}
-
-#site-image {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-/* 画像の上に重ねる日付文字(現在のHTMLでは未使用)。上部中央に白文字で表示する。 */
-#site-image-date {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #ffffff;
-    font-size: 24px;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-/* 画像内の特定位置(割合指定)に重ねた透明リンク。クリックで日記ページへ移動する。 */
-#diary-image-link {
-    position: absolute;
-    top: 89%;
-    left: 46%;
-    width: 11%;
-    height: 7%;
-    font-size: 0;
-}
-
-/* キーボード操作でフォーカスした時だけ、透明リンクの位置が分かる枠を出す。 */
-#diary-image-link:focus-visible {
-    outline: 2px solid #ffffff;
-    outline-offset: 2px;
-}
-
-/* 過去コメントの見出しは昔風の点線枠でフォーカス表示する。 */
-.chat-message-group summary:focus {
+/* キーボード操作中のフォーカス位置を表示する */
+button:focus {
     outline: 1px dotted #000000;
     outline-offset: -4px;
 }
 
-/* ===== コメント一覧 + 投稿フォームの外枠 ===== */
-
-/* 左にコメント一覧、右に投稿フォームを横並びにする。outsetの枠線と影で立体的なパネルに見せる。 */
-#message-layout {
-    position: relative;
-    display: flex;
-    align-items: stretch;
-    gap: 16px;
-    justify-content: center;
-    width: 100%;
-    margin: 0 auto;
-    margin-bottom: 16px;
-    padding-bottom: 0;
-    box-sizing: border-box;
-    color: #000000;
-    background: #c0c0c0;
-    border: 2px outset #dfdfdf;
-    box-shadow: 2px 2px 0 #404040;
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: #808080;
+    box-shadow: none;
 }
 
-/* 前回の高さを確保し、コメント読込中のレイアウト移動を抑える。 */
-body:not(.comments-ready):not(.message-layout-size-reserved) #message-layout {
-    visibility: hidden;
-    min-height: var(--message-layout-reserved-height, 0px);
-}
-
-/* 前回の高さが保存されている場合は、読込中でも枠を表示しておく(index.htmlの先頭スクリプトが html にクラスを付ける)。 */
-html.message-layout-size-reserved body:not(.comments-ready) #message-layout {
-    visibility: visible;
-}
-
-/* 読込中は入力欄も保存済みの高さで確保し、読込完了時に伸び縮みしないようにする。 */
-body:not(.comments-ready) #message {
-    height: var(--message-input-reserved-height, 9em);
-    min-height: var(--message-input-reserved-height, 36em);
-}
-
-/* コメント一覧の領域。残りの幅を使い、最大580pxまで。 */
-#chat {
-    flex: 1;
-    min-width: 0;
-    max-width: 580px;
-    margin: 24px 0;
-    padding: 8px;
-    box-sizing: border-box;
+/* スクロールバーの有無による横ずれを防ぐ */
+html {
+    overflow-y: scroll;
+    /* 動的な内容追加によるスクロール位置の自動補正を無効にする */
     overflow-anchor: none;
 }
 
-/* 右側の投稿フォーム(入力欄と操作ボタン)。幅380px固定で、折り返しで縦に並べる。 */
-#message-form {
-    display: flex;
-    align-self: flex-start;
-    flex: 0 0 380px;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 24px 0;
-    padding: 8px 12px 12px;
-    box-sizing: border-box;
+body:not(.page-sections-ready) #diary-section,
+body:not(.page-sections-ready) #message-section {
+    visibility: hidden;
 }
 
-/* 入力欄。inset枠でへこんだ見た目にする。高さは comments.js がコメント欄に合わせて調整する。 */
-#message {
-    flex: 0 0 100%;
-    min-width: 0;
-    height: 9em;
-    min-height: 36em;
-    box-sizing: border-box;
-    padding: 8px;
-    font-size: inherit;
-    color: #000000;
-    background: #ffffff;
-    border: 2px inset #808080;
-    overflow-y: auto;
-    resize: none;
+/* ==================================================
+   日記ページ
+   ================================================== */
+
+/* 日記本文を中央に広く配置する。 */
+#diary-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: min(calc(100% - 32px), 480px);
+    margin: 24px auto 8px;
 }
 
-/* 入力欄の下の操作行。状態メッセージ(#diary-status)をこの行の下に絶対配置するため relative にする。 */
-#message-actions {
-    position: relative;
-    display: flex;
-    flex: 0 0 100%;
-    align-items: center;
-    gap: 8px;
-    min-height: 27.2px;
-}
-
-/* 管理者用の日記コントロール(タイトル欄と日記ボタン)。 */
-#admin-diary-controls {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    gap: 8px;
+/* 選択中の日記。 */
+#diary-view {
+    grid-column: 1;
+    grid-row: 1;
     min-width: 0;
 }
 
-#admin-diary-controls[hidden] {
-    /* flex指定よりhidden属性を優先する。 */
+/* 前へ/次へボタンの行。前を左端、次を右端に配置する。 */
+.diary-entry-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* display:flex より hidden 属性を優先して隠す。 */
+.diary-entry-navigation[hidden] {
     display: none;
 }
 
-/* 日記タイトル(日付)の入力欄。 */
-#diary-title {
-    flex: 1;
-    min-width: 0;
+.diary-entry-navigation button {
+    width: fit-content;
     box-sizing: border-box;
-    padding: 5px 8px;
+    min-height: 36px;
+    padding: 8px 12px;
     color: #000000;
-    background: #ffffff;
-    border: 2px inset #808080;
-}
-
-#diary-title:focus {
-    outline: none;
-}
-
-/* 各種ボタンと過去コメントの見出しに共通する、立体的なグレーのボタン。 */
-#diary-send,
-#diary-confirm-yes,
-#diary-confirm-no,
-#send,
-.chat-message-group summary {
-    box-sizing: border-box;
     font-weight: bold;
-    color: #000000;
     background: #c0c0c0;
     border: 2px outset #dfdfdf;
     cursor: pointer;
 }
 
-#diary-send {
-
-    padding: 4px 10px;
+.diary-entry-navigation [data-diary-direction="previous"] {
+    margin-right: auto;
 }
 
-/* 日記投稿の結果表示。操作行の直下に重ねて表示し、レイアウトを押し下げない。 */
-#diary-status {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
+.diary-entry-navigation [data-diary-direction="next"],
+.diary-entry-navigation #diary-add,
+.diary-entry-navigation #diary-confirm {
+    margin-left: auto;
+}
+
+.diary-entry-navigation button:active {
+    border-style: inset;
+    transform: translate(2px, 2px);
+}
+
+/* ナビゲーションが日記の上に来る時だけ下に余白を空ける。 */
+.diary-entry-navigation:first-child {
+    margin-bottom: 12px;
+}
+
+/* --------------------------------------------------
+   日記1件の表示（diary.js が生成）
+   -------------------------------------------------- */
+
+/* 日付ヘッダー → 本文 → 画像 を縦に積む。 */
+.diary-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     margin: 0;
+}
+
+.diary-entry-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
     color: #000000;
-    white-space: nowrap;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    order: 2;
 }
 
-/* 「日記を送信しますか？」の確認文。 */
-#diary-confirm-question {
-    flex: 1;
-}
+/* 日付文字。折り返さず右寄せ。 */
+.diary-entry-date {
 
-/* はい/いいえボタンは同じ大きさにそろえる。 */
-#diary-confirm-yes,
-#diary-confirm-no {
-
-    width: 52.5849px;
-    min-height: 27.2px;
-    padding: 4px 0;
-}
-
-/* 押下中はへこんで右下にずれ、ボタンを押した感触を出す(他のボタンも同様)。 */
-#diary-confirm-yes:active,
-#diary-confirm-no:active {
-
-    border-style: inset;
-    transform: translate(2px, 2px);
-}
-
-/* 送信/はいボタンの入れ物。右端に寄せる。 */
-#message-submit-controls {
-    display: flex;
-    margin-left: auto;
-}
-
-/* メッセージが空の間は領域ごと消す。 */
-#diary-status:empty {
-
-    display: none;
-}
-
-#message:focus {
-    outline: none;
-}
-
-/* 送信ボタン */
-#send {
-
-    align-self: flex-end;
-    margin-left: auto;
-    padding: 4px 10px;
-}
-
-#send:active,
-#diary-send:active {
-    border-style: inset;
-    transform: translate(2px, 2px);
-}
-
-/* ===== コメント1件の表示(comments.js が生成) ===== */
-
-/* 本文と日時を横に並べ、入りきらない時は日時が次の行に折り返す。 */
-.chat-message {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    column-gap: 4px;
-    margin: 0;
-    padding: 0 4px;
-}
-
-/* 投稿日時。右下に小さく灰色で表示する。 */
-.chat-message-date {
-
-    display: block;
-    align-self: end;
-    margin-left: auto;
-    margin-top: 0;
-    color: #404040;
-    font-size: 0.8em;
+    flex: 0 0 auto;
     text-align: right;
     white-space: nowrap;
 }
 
-/* 管理者投稿の目印(🌎)。 */
-.chat-message-admin {
-
-    font-size: 1em;
-    font-weight: bold;
-}
-
-/* コメント本文。改行はそのまま表示(pre-wrap)し、長い文字列は折り返す。 */
-.chat-message-content {
-
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 2px 0;
-    line-height: 1;
+/* 日記本文。改行をそのまま表示し、行間を広めにする。 */
+.diary-entry-content {
+    padding: 8px 10px;
+    line-height: 1.6;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    order: 0;
 }
 
-/* 本文中のURLリンク: 未訪問は青、訪問済みは紫の昔ながらの配色。 */
-.chat-message-content a {
-
-    color: #0000ee;
-    text-decoration: underline;
+/* 日記に添付された画像を入れる枠。 */
+.diary-entry-images {
+    padding: 8px;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    order: 1;
 }
 
-.chat-message-content a:visited {
-
-    color: #551a8b;
+/* 画像を横幅いっぱいに縦に並べる。 */
+.diary-entry-image-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
 }
 
-/* 管理者投稿は本文・日時とも黒で表示する(日時は通常の投稿より濃くなる)。 */
-.chat-message.admin-post .chat-message-content {
+.diary-entry-image-grid img {
 
-    color: #000000;
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
-.chat-message.admin-post .chat-message-date {
-
-    color: #404040;
-}
-
-/* ===== 過去コメントの折りたたみグループ(detailsタグ) ===== */
-
-.chat-message-group {
+/* 画像の縮小に失敗した時のエラー表示。 */
+.diary-image-error {
     margin: 0;
-    padding: 0;
-    border: 0;
+    padding: 8px 10px;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    order: 1;
 }
 
-/* グループの見出し(開始日時 ～)。ボタンのような見た目にする。 */
-.chat-message-group summary {
+/* --------------------------------------------------
+   日記の新規投稿欄（管理者モードのみ）
+   -------------------------------------------------- */
 
-    display: list-item;
-    margin: 0;
-    padding: 4px 10px;
-    font: inherit;
+/* 管理者モードで表示中の日記の枠に差し込む入力部品 */
+#diary-body {
+    display: block;
+    width: 100%;
+    min-height: 0;
+    padding: 6px;
     box-sizing: border-box;
+    resize: none;
+    overflow: hidden;
+}
+
+#diary-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 2px 4px;
+    box-sizing: border-box;
+    text-align: right;
+}
+
+#diary-editor-status {
+    margin-right: auto;
+}
+
+#diary-editor-status:empty {
+    display: none;
+}
+
+/* --------------------------------------------------
+   コメント欄（日記の下）
+   -------------------------------------------------- */
+
+#message-section {
+    width: min(calc(100% - 32px), 480px);
+    margin: 8px auto 24px;
+}
+
+#message-layout {
+    --chat-date-width: 89px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    background: #c0c0c0;
     border: 2px outset #dfdfdf;
 }
 
-.chat-message-group-date {
+#chat,
+#message-form {
+    flex: 0 0 auto;
+    min-width: 0;
+    box-sizing: border-box;
+}
 
+#chat {
+    order: 1;
+    padding: 8px 12px 12px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+    background: #c0c0c0;
+}
+
+#message-form {
+    order: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: end;
+    gap: 8px;
+    width: 100%;
+    height: auto;
+    padding: 12px 12px 0;
+    background: transparent;
+    border: 0;
+}
+
+.chat-message {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 2px 0;
+}
+
+.chat-message-content {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.chat-message-date {
+    flex: 0 0 var(--chat-date-width);
+    font-size: 11px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.chat-message-admin {
+    color: #0000ee;
     font-weight: bold;
 }
 
-/* 展開した時に中へ表示される過去コメント。 */
-.chat-message-group-content {
-
-    margin-left: 4px;
-    padding-top: 4px;
-}
-
-.chat-message-group summary:active {
-
-    border-style: inset;
-}
-
-/* 読込失敗などの案内文。 */
-.chat-message-group-status {
-
-    margin: 8px 12px;
-}
-
-/* 直近コメントと過去コメントは同じだけ左に余白を取る。 */
-.chat-message-group .chat-message {
-
-    margin-left: 12px;
-}
-
-.chat-recent-messages .chat-message {
-
-    margin-left: 12px;
-}
-
-/* 直近コメントと過去グループの間の余白。 */
-.chat-older-messages {
-
+.chat-message-group {
     margin-top: 8px;
+}
+
+.chat-message-group:first-child {
+    margin-top: 0;
+}
+
+.chat-older-messages {
+    order: 2;
+    margin: -8px 4px 4px;
+    padding: 0 8px 8px;
+}
+
+.chat-message-group summary {
+    width: fit-content;
+    cursor: pointer;
+}
+
+.chat-message-group[open] summary {
+    margin-bottom: 4px;
+}
+
+.chat-message-group-content {
+    padding: 0;
+}
+
+#message {
+    display: block;
+    width: 100%;
+    min-height: 4em;
+    padding: 6px;
+    box-sizing: border-box;
+    resize: none;
+}
+
+#message-actions {
+    display: contents;
+}
+
+#message-submit-controls {
+    display: flex;
+    justify-content: flex-end;
+    grid-column: 1;
+    justify-self: stretch;
+}
+
+#message-submit-controls button {
+    padding: 5px 8px;
+    color: #000000;
+    font-weight: bold;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    cursor: pointer;
+}
+
+#message-submit-controls button:only-child {
+    margin-top: auto;
+}
+
+#message-submit-controls button:active {
+    border-style: inset;
+    transform: translate(2px, 2px);
+}
+
+body:not(.comments-ready):not(.message-layout-size-reserved) #message-section {
+    min-height: var(--message-layout-reserved-height, 0px);
+}
+
+html.message-layout-size-reserved body:not(.comments-ready) #message-section {
+    min-height: var(--message-layout-reserved-height, 0px);
 }
