@@ -4,7 +4,6 @@
 
 /* ページ全体の基本設定 */
 body {
-    min-width: 320px;
     font-family: "ＭＳ Ｐゴシック", "MS PGothic", "Hiragino Kaku Gothic ProN",
         "Hiragino Sans", sans-serif;
     font-size: 14px;

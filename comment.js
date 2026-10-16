@@ -17,8 +17,6 @@ window.addEventListener("storage", function (event) {
         updateOlderMessagesVisibility();
     }
 });
-let suppressInitialScrollRestore =
-    window.matchMedia("(max-width: 700px)").matches;
 // ページ再表示時のレイアウト移動を抑えるため、高さを保存する。
 const reservedMessageLayoutHeightKey = "message-layout-reserved-height";
 // 前回のページ離脱時に保存した値を読み込み、初期描画時の高さとして再利用する。
@@ -326,10 +324,8 @@ async function loadMessage() {
 
         // 読込開始前に最下部を見ていた場合だけ、反映後も最下部へ戻す。
         restoreToBottom =
-            !suppressInitialScrollRestore &&
             window.scrollY + window.innerHeight >=
             document.documentElement.scrollHeight - 2;
-        suppressInitialScrollRestore = false;
         recentMessagesContainer.replaceChildren(
             ...stagedRecentMessages.childNodes
         );
