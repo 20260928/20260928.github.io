@@ -61,7 +61,7 @@ function getDiaryImageDate(title) {
     return year.slice(-2) + month.padStart(2, "0") + day.padStart(2, "0");
 }
 
-// images/YYMMDD-NN.拡張子 の画像を1枚読み込み、縮小したimg要素で解決するPromiseを返す。
+// images/YYMMDD-NN.拡張子 の画像を1枚読み込み、縮小画像の読込完了後に解決するPromiseを返す。
 // どの拡張子でも存在しなければ null で解決する(=連番の終わり)。縮小に失敗したら reject する。
 function loadDiaryImage(date, sequence) {
     return new Promise(function (resolve, reject) {
@@ -86,9 +86,10 @@ function loadDiaryImage(date, sequence) {
         image.alt = "";
         // 画面外でも即座に読み込む(縮小処理に必要なため)。
         image.loading = "eager";
-        // 読込成功時: これ以上の拡張子探索を止め、canvasで縮小してdata URLに置き換える。
-        image.addEventListener("load", function () {
+        // 元画像の読込成功時: canvasで縮小し、縮小後の画像が読めてから表示用に返す。
+        image.addEventListener("load", function handleSourceLoad() {
             image.removeEventListener("error", tryNextExtension);
+            image.removeEventListener("load", handleSourceLoad);
             try {
                 const canvas = document.createElement("canvas");
                 canvas.width = diaryImageWidth;
@@ -106,15 +107,23 @@ function loadDiaryImage(date, sequence) {
                     diaryImageWidth,
                     diaryImageHeight
                 );
-                image.src = canvas.toDataURL(
+                const resizedImage = document.createElement("img");
+                resizedImage.alt = "";
+                resizedImage.loading = "eager";
+                resizedImage.addEventListener("load", function () {
+                    resolve(resizedImage);
+                }, { once: true });
+                resizedImage.addEventListener("error", function () {
+                    reject(new Error("縮小後の日記画像を読み込めませんでした。"));
+                }, { once: true });
+                resizedImage.src = canvas.toDataURL(
                     "image/jpeg",
                     diaryImageQuality
                 );
-                resolve(image);
             } catch (error) {
                 reject(error);
             }
-        }, { once: true });
+        });
         // 読込失敗(ファイルなし)時は次の拡張子を試す。最初の1回は手動で開始する。
         image.addEventListener("error", tryNextExtension);
         tryNextExtension();
