@@ -19,11 +19,6 @@ textarea {
     font: inherit;
 }
 
-input,
-textarea {
-    border-radius: 0;
-}
-
 /* キーボード操作中のフォーカス位置を表示する */
 button:focus {
     outline: 1px dotted #000000;
@@ -138,7 +133,6 @@ body:not(.page-sections-ready) #message-section {
 
 /* 日付文字。折り返さず右寄せ。 */
 .diary-entry-date {
-
     flex: 0 0 auto;
     text-align: right;
     white-space: nowrap;
@@ -171,19 +165,9 @@ body:not(.page-sections-ready) #message-section {
 }
 
 .diary-entry-image-grid img {
-
     display: block;
     width: 100%;
     height: auto;
-}
-
-/* 画像の縮小に失敗した時のエラー表示。 */
-.diary-image-error {
-    margin: 0;
-    padding: 8px 10px;
-    background: #c0c0c0;
-    border: 2px outset #dfdfdf;
-    order: 1;
 }
 
 /* --------------------------------------------------
@@ -282,6 +266,7 @@ body:not(.page-sections-ready) #message-section {
 
 .chat-message-date {
     flex: 0 0 var(--chat-date-width);
+    align-self: flex-end;
     font-size: 11px;
     text-align: right;
     white-space: nowrap;

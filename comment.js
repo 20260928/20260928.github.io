@@ -21,12 +21,9 @@ let suppressInitialScrollRestore =
     window.matchMedia("(max-width: 700px)").matches;
 // ページ再表示時のレイアウト移動を抑えるため、高さを保存する。
 const reservedMessageLayoutHeightKey = "message-layout-reserved-height";
-const reservedMessageInputHeightKey = "message-input-reserved-height";
 // 前回のページ離脱時に保存した値を読み込み、初期描画時の高さとして再利用する。
 const reservedMessageLayoutHeight =
     sessionStorage.getItem(reservedMessageLayoutHeightKey);
-const reservedMessageInputHeight =
-    sessionStorage.getItem(reservedMessageInputHeightKey);
 // チャット領域の予約高をCSSカスタムプロパティに戻し、描画の揺れを防ぐ。
 if (reservedMessageLayoutHeight !== null) {
     document.documentElement.style.setProperty(
@@ -34,19 +31,9 @@ if (reservedMessageLayoutHeight !== null) {
         reservedMessageLayoutHeight
     );
 }
-// 領域と入力欄の両方の高さが保存されている場合だけ、予約用クラスを有効にする。
-if (
-    reservedMessageLayoutHeight !== null &&
-    reservedMessageInputHeight !== null
-) {
+// 前回の領域高が保存されている場合だけ、予約用クラスを有効にする。
+if (reservedMessageLayoutHeight !== null) {
     document.body.classList.add("message-layout-size-reserved");
-}
-// 入力欄の高さも復元し、画面の初期レイアウトを前回に近づける。
-if (reservedMessageInputHeight !== null) {
-    document.documentElement.style.setProperty(
-        "--message-input-reserved-height",
-        reservedMessageInputHeight
-    );
 }
 function saveMessageLayoutSize() {
     // 読み込み前の不完全なサイズや、対象要素がない状態は保存しない。
@@ -55,10 +42,6 @@ function saveMessageLayoutSize() {
         sessionStorage.setItem(
             reservedMessageLayoutHeightKey,
             messageSection.getBoundingClientRect().height + "px"
-        );
-        sessionStorage.setItem(
-            reservedMessageInputHeightKey,
-            message.getBoundingClientRect().height + "px"
         );
     }
 }
@@ -77,10 +60,7 @@ const olderMessageFetchSize = 1000;
 // 新しい投稿と、過去投稿の折りたたみグループを別々の領域に配置する。
 const recentMessagesContainer = document.createElement("div");
 
-// 過去投稿の開始位置、取得状態、非同期再読込の世代番号を保持する。
-let oldestRecentMessageId = null;
-let olderMessageGroupsLoading = false;
-let olderMessageGroupsLoaded = false;
+// 非同期再読込の世代番号を保持する。
 let messageLoadVersion = 0;
 recentMessagesContainer.className = "chat-recent-messages";
 // 直近の投稿だけを灰色のコメント欄に配置する。
@@ -92,8 +72,8 @@ function formatMessageDate(row) {
 
     return (
         date.getFullYear() + "/" +
-        (date.getMonth() + 1) + "/" +
-        date.getDate() + " " +
+        String(date.getMonth() + 1).padStart(2, "0") + "/" +
+        String(date.getDate()).padStart(2, "0") + " " +
         String(date.getHours()).padStart(2, "0") + ":" +
         String(date.getMinutes()).padStart(2, "0") + ":" +
         String(date.getSeconds()).padStart(2, "0")
@@ -254,7 +234,6 @@ async function loadMessage() {
     let cursorId = null;
     let splitMetadata = [];
     let hasMoreMessages = true;
-    let stagedOldestRecentMessageId = null;
     let restoreToBottom = false;
 
     try {
@@ -301,7 +280,6 @@ async function loadMessage() {
                 }
 
                 lineCount += messageLines;
-                stagedOldestRecentMessageId = row.id;
             }
         }
 
@@ -358,9 +336,6 @@ async function loadMessage() {
         olderMessagesContainer.replaceChildren(
             ...stagedOlderMessages.childNodes
         );
-        oldestRecentMessageId = stagedOldestRecentMessageId;
-        olderMessageGroupsLoaded = splitMetadata.length > 0;
-        olderMessageGroupsLoading = false;
     } finally {
         // 成功・失敗のどちらでも仮置き用の要素を片付ける。
         stagedRecentMessages.remove();
@@ -369,9 +344,6 @@ async function loadMessage() {
             document.body.classList.add("comments-ready");
             document.documentElement.style.removeProperty(
                 "--message-layout-reserved-height"
-            );
-            document.documentElement.style.removeProperty(
-                "--message-input-reserved-height"
             );
             document.body.classList.remove("message-layout-size-reserved");
             saveMessageLayoutSize();
@@ -404,7 +376,6 @@ function createOlderMessageGroup(metadata, container = olderMessagesContainer) {
     olderMessageGroup.append(groupTitle, groupContent);
 
     const group = {
-        details: olderMessageGroup,
         content: groupContent,
         metadata,
         messagesLoaded: false,
@@ -444,8 +415,7 @@ async function ensureOlderMessageGroupLoaded(group) {
             group.metadata,
             function () {
                 group.messagesLoaded = true;
-            },
-            function () { }
+            }
         ).finally(function () {
             group.loadingPromise = null;
         });
@@ -453,14 +423,8 @@ async function ensureOlderMessageGroupLoaded(group) {
     await group.loadingPromise;
 }
 
-async function loadOlderMessageGroup(
-    content,
-    metadata,
-    setLoaded,
-    setLoading
-) {
+async function loadOlderMessageGroup(content, metadata, setLoaded) {
     // グループ内の古い投稿本文をIDの範囲で限定して読み込む。
-    setLoading(true);
     content.replaceChildren();
 
     const { data, error } = await supabaseClient
@@ -474,7 +438,6 @@ async function loadOlderMessageGroup(
     if (error) {
         // 失敗はコンソールにだけ記録する。
         console.error(error);
-        setLoading(false);
         return;
     }
 
@@ -484,60 +447,6 @@ async function loadOlderMessageGroup(
         content.appendChild(createMessageElement(row));
     });
     setLoaded(true);
-    setLoading(false);
-}
-
-async function loadOlderMessageGroups() {
-    // 重複取得、完了後の再取得、境界未確定の状態では何もしない。
-    if (
-        olderMessageGroupsLoading ||
-        olderMessageGroupsLoaded ||
-        oldestRecentMessageId === null
-    ) {
-        return;
-    }
-
-    olderMessageGroupsLoading = true;
-    const allOlderMetadata = [];
-    let cursorId = oldestRecentMessageId;
-
-    // 過去分はIDと日時だけ先に取得し、本文はグループを開いた時に読む。
-    while (true) {
-        const { data, error } = await supabaseClient
-            .from("message")
-            .select("id, created_at")
-            .lt("id", cursorId)
-            .order("id", { ascending: false })
-            .limit(olderMessageFetchSize);
-
-        if (error) {
-            // メタデータ取得に失敗したらコンソールに記録し、再試行可能に戻す。
-            console.error(error);
-            olderMessageGroupsLoading = false;
-            return;
-        }
-
-        allOlderMetadata.push(...data);
-        if (data.length < olderMessageFetchSize) {
-            break;
-        }
-        cursorId = data[data.length - 1].id;
-    }
-
-    // すべてのID・日時を一定件数に区切り、展開可能なグループを追加する。
-    for (
-        let start = 0;
-        start < allOlderMetadata.length;
-        start += olderMessageChunkSize
-    ) {
-        const metadata = allOlderMetadata.slice(
-            start,
-            start + olderMessageChunkSize
-        );
-        createOlderMessageGroup(metadata);
-    }
-    olderMessageGroupsLoaded = true;
-    olderMessageGroupsLoading = false;
 }
 
 // --------------------------------------------------

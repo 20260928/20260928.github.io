@@ -24,7 +24,6 @@ let diaryEditing = false;
 const diaryAddButton = document.getElementById("diary-add");
 // 閲覧画面の要素（index.html）
 const diaryList = document.getElementById("diary-list");
-const diaryLoadStatus = document.getElementById("diary-load-status");
 const diaryEntryNavigation = document.querySelector(".diary-entry-navigation");
 // 前後の日記へ移動するボタン
 const diaryNavigationButtons = document.querySelectorAll(
@@ -194,6 +193,7 @@ function updateDiaryEditor() {
     const content = article.querySelector(".diary-entry-content");
     const header = article.querySelector(".diary-entry-header");
     const dateLabel = article.querySelector(".diary-entry-date");
+    const images = article.querySelector(".diary-entry-images");
     if (window.isAdminMode() && diaryEditing && selectedDiaryIndex === 0) {
         if (content.dataset.text === undefined) {
             content.dataset.text = content.textContent;
@@ -203,12 +203,18 @@ function updateDiaryEditor() {
         }
         content.replaceChildren(diaryBody);
         resizeDiaryBody();
+        if (images) {
+            images.hidden = true;
+        }
         dateLabel.hidden = true;
         header.prepend(diaryEditorStatus);
         header.append(diaryTitleInput);
     } else if (content.dataset.text !== undefined) {
         content.textContent = content.dataset.text;
         delete content.dataset.text;
+        if (images) {
+            images.hidden = false;
+        }
         dateLabel.hidden = false;
         diaryEditorStatus.remove();
         diaryTitleInput.remove();
@@ -365,15 +371,6 @@ async function renderDiarySelection(index) {
 
     // 配列は新しい順なので、「前」は添字+1、「次」は添字-1。移動先がなければボタンを隠し、あれば移動先の日付を表示する。
     updateDiaryNavigationButtons();
-    diaryEntryNavigation.classList.toggle(
-        "diary-entry-navigation-latest",
-        index === 0
-    );
-    diaryEntryNavigation.classList.toggle(
-        "diary-entry-navigation-oldest",
-        index === diaryEntries.length - 1
-    );
-
     if (!diaryArticles[index]) {
         diaryArticles[index] = await diaryArticlePromises[index];
         diaryArticlePromises[index] = null;
@@ -395,7 +392,7 @@ function hideDiaryNavigation() {
 // 日記を新しい順に全件取得し、最新の日記を表示する。
 async function loadDiaries() {
     // 閲覧用の要素がないページでは何もしない。
-    if (!diaryList || !diaryLoadStatus) {
+    if (!diaryList) {
         return;
     }
 
@@ -418,7 +415,7 @@ async function loadDiaries() {
         return null;
     });
 
-    // 日記があれば最新(先頭)を表示して前後ボタンを出し、なければ案内を表示する。
+    // 日記があれば最新(先頭)を表示し、日記がない場合は前後ボタンを隠す。
     if (diaryEntries.length > 0) {
         await renderDiarySelection(0);
         diaryEntryNavigation.hidden = false;

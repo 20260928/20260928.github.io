@@ -15,20 +15,13 @@
             const layoutHeight = sessionStorage.getItem(
                 "message-layout-reserved-height"
             );
-            const inputHeight = sessionStorage.getItem(
-                "message-input-reserved-height"
-            );
-            if (layoutHeight !== null && inputHeight !== null) {
+            if (layoutHeight !== null) {
                 document.documentElement.classList.add(
                     "message-layout-size-reserved"
                 );
                 document.documentElement.style.setProperty(
                     "--message-layout-reserved-height",
                     layoutHeight
-                );
-                document.documentElement.style.setProperty(
-                    "--message-input-reserved-height",
-                    inputHeight
                 );
             }
         })();
@@ -50,10 +43,7 @@
             </nav>
             <!-- 日記1件分の表示先 -->
             <div id="diary-list"></div>
-            <!-- 読込失敗・日記なし等のメッセージ表示先 -->
-            <p id="diary-load-status" aria-live="polite"></p>
         </section>
-    </main>
     </main>
 
     <!-- 日記の下にコメント一覧と投稿欄を表示する -->
