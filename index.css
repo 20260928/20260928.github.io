@@ -5,7 +5,8 @@
 /* ページ全体の基本設定 */
 body {
     min-width: 320px;
-    font-family: "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+    font-family: "ＭＳ Ｐゴシック", "MS PGothic", "Hiragino Kaku Gothic ProN",
+        "Hiragino Sans", sans-serif;
     font-size: 14px;
     color: #000000;
     background-color: #ffffff;
@@ -16,6 +17,11 @@ button,
 input,
 textarea {
     font: inherit;
+}
+
+input,
+textarea {
+    border-radius: 0;
 }
 
 /* キーボード操作中のフォーカス位置を表示する */
