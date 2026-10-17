@@ -33,12 +33,8 @@ const diaryNavigationButtons = document.querySelectorAll(
 let diaryEntries = [];
 // 生成済みDOMのキャッシュ（未生成はnull）
 let diaryArticles = [];
-// 日記画像を含むDOMの生成処理をキャッシュする。
-let diaryArticlePromises = [];
 // 現在表示中の日記の添字
 let selectedDiaryIndex = 0;
-// 古い日記の画像読込完了後に、選択状態を巻き戻さないための世代番号。
-let diaryRenderVersion = 0;
 // 日記画像の拡張子の候補。この順に試して最初に存在したものを使う。
 const diaryImageExtensions = ["jpg", "jpeg", "png", "gif", "webp", "avif"];
 // 縮小後の画像サイズ(px)とJPEG品質(0〜1)
@@ -310,7 +306,7 @@ function formatDiaryTitleDate(date) {
 }
 
 // 日記1件分の表示用article要素を作る(日付ヘッダー・本文・画像)。
-async function createDiaryEntry(entry) {
+function createDiaryEntry(entry) {
     const article = document.createElement("article");
     article.className = "diary-entry";
     // タイトルに「|」がある場合は、その前までを日付として表示する。
@@ -326,8 +322,6 @@ async function createDiaryEntry(entry) {
     // 投稿本文をHTMLとして解釈させない。
     content.textContent = entry.content;
     article.append(header, content);
-    // 画像を含む日記全体を組み立ててから表示し、表示中の高さ変化を防ぐ。
-    await appendDiaryImages(article, date);
     return article;
 }
 
@@ -350,7 +344,7 @@ function updateDiaryNavigationButtons() {
 }
 
 // index番目の日記を表示し、前後ボタンを更新する。
-async function renderDiarySelection(index) {
+function renderDiarySelection(index) {
     // 範囲外・数値でない添字は無視する。
     if (!Number.isInteger(index) || index < 0 || index >= diaryEntries.length) {
         return;
@@ -363,23 +357,19 @@ async function renderDiarySelection(index) {
         updateDiaryConfirmButton();
     }
     selectedDiaryIndex = index;
-    const renderVersion = ++diaryRenderVersion;
-    // 初回は画像まで含めて裏で組み立て、完了した時点で一度に表示する。
-    if (!diaryArticles[index] && !diaryArticlePromises[index]) {
-        diaryArticlePromises[index] = createDiaryEntry(diaryEntries[index]);
+    // 画像の探索を待たずに本文を先に表示する。
+    if (!diaryArticles[index]) {
+        const entry = diaryEntries[index];
+        diaryArticles[index] = createDiaryEntry(entry);
+        appendDiaryImages(diaryArticles[index], entry.title).catch(function (error) {
+            console.error("日記画像を読み込めませんでした。", error);
+        });
     }
 
     // 配列は新しい順なので、「前」は添字+1、「次」は添字-1。移動先がなければボタンを隠し、あれば移動先の日付を表示する。
     updateDiaryNavigationButtons();
-    if (!diaryArticles[index]) {
-        diaryArticles[index] = await diaryArticlePromises[index];
-        diaryArticlePromises[index] = null;
-    }
-    // 読込中に別の日記が選択されていた場合、古い結果は表示しない。
-    if (renderVersion === diaryRenderVersion) {
-        diaryList.replaceChildren(diaryArticles[index]);
-        updateDiaryAdminUi();
-    }
+    diaryList.replaceChildren(diaryArticles[index]);
+    updateDiaryAdminUi();
 }
 
 // 日記がない・読み込めない場合に、前後ボタンを隠す。
@@ -411,13 +401,10 @@ async function loadDiaries() {
     diaryArticles = data.map(function () {
         return null;
     });
-    diaryArticlePromises = data.map(function () {
-        return null;
-    });
 
     // 日記があれば最新(先頭)を表示し、日記がない場合は前後ボタンを隠す。
     if (diaryEntries.length > 0) {
-        await renderDiarySelection(0);
+        renderDiarySelection(0);
         diaryEntryNavigation.hidden = false;
     } else {
         hideDiaryNavigation();

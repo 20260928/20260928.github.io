@@ -6,6 +6,8 @@
 
     <meta charset="UTF-8">
     <title>20260928</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://wqhcznhalhpsxchkdauz.supabase.co" crossorigin>
     <link rel="icon" type="image/png" href="images/site-icon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
     <!-- 描画前にコメント欄の予約サイズを復元し、読込中のレイアウト移動を防ぐ -->
@@ -63,20 +65,14 @@
 
     <!-- 読込順: Supabaseライブラリ → 接続設定 → 日記 → コメント -->
     <script>
-        (function () {
-            const readySections = new Set();
-            window.markPageSectionReady = function (section) {
-                readySections.add(section);
-                if (readySections.has("diary") && readySections.has("comments")) {
-                    document.body.classList.add("page-sections-ready");
-                }
-            };
-        })();
+        window.markPageSectionReady = function (section) {
+            document.body.classList.add(section + "-ready");
+        };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
-    <script src="diary.js"></script>
-    <script src="comment.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="supabase.js"></script>
+    <script defer src="diary.js"></script>
+    <script defer src="comment.js"></script>
 </body>
 
 </html>

@@ -38,8 +38,8 @@ html {
     overflow-anchor: none;
 }
 
-body:not(.page-sections-ready) #diary-section,
-body:not(.page-sections-ready) #message-section {
+body:not(.diary-ready) #diary-section,
+body:not(.comments-ready) #message-section {
     visibility: hidden;
 }
 
