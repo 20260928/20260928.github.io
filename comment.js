@@ -212,6 +212,9 @@ function appendMessageContent(container, text) {
 async function loadMessage() {
     // 新しい読込要求に番号を割り当て、後から完了した古い要求を識別する。
     const loadVersion = ++messageLoadVersion;
+    // 初回表示では、短いページを最下部表示中と誤判定してスクロールしない。
+    const canRestoreToBottom =
+        document.body.classList.contains("comments-ready");
     // 画面外で組み立てて一括反映し、読込途中の表示崩れを防ぐ。
     const stagedRecentMessages = document.createElement("div");
     const stagedOlderMessages = document.createElement("div");
@@ -318,8 +321,8 @@ async function loadMessage() {
             return;
         }
 
-        // 読込開始前に最下部を見ていた場合だけ、反映後も最下部へ戻す。
-        restoreToBottom =
+        // 更新前に最下部を見ていた場合だけ、反映後も最下部へ戻す。
+        restoreToBottom = canRestoreToBottom &&
             window.scrollY + window.innerHeight >=
             document.documentElement.scrollHeight - 2;
         recentMessagesContainer.replaceChildren(
