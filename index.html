@@ -12,6 +12,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
     <!-- 描画前にコメント欄の予約サイズを復元し、読込中のレイアウト移動を防ぐ -->
     <script>
+        if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+        }
         (function () {
             const layoutHeight = sessionStorage.getItem(
                 "message-layout-reserved-height"

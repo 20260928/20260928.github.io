@@ -35,8 +35,6 @@ let diaryEntries = [];
 let diaryArticles = [];
 // 現在表示中の日記の添字
 let selectedDiaryIndex = 0;
-// 日記画像の拡張子の候補。この順に試して最初に存在したものを使う。
-const diaryImageExtensions = ["jpg", "jpeg", "png", "gif", "webp", "avif"];
 // 縮小後の画像サイズ(px)とJPEG品質(0〜1)
 const diaryImageWidth = 360;
 const diaryImageHeight = 270;
@@ -56,34 +54,19 @@ function getDiaryImageDate(title) {
     return year.slice(-2) + month.padStart(2, "0") + day.padStart(2, "0");
 }
 
-// images/YYMMDD-NN.拡張子 の画像を1枚読み込み、縮小画像の読込完了後に解決するPromiseを返す。
-// どの拡張子でも存在しなければ null で解決する(=連番の終わり)。縮小に失敗したら reject する。
+// images/YYMMDD-NN.jpg を読み込み、縮小画像の読込完了後に解決するPromiseを返す。
+// JPGが存在しなければ null で解決する(=連番の終わり)。縮小に失敗したら reject する。
 function loadDiaryImage(date, sequence) {
     return new Promise(function (resolve, reject) {
         const image = document.createElement("img");
         // 連番は2桁(01, 02, ...)
         const fileNumber = String(sequence).padStart(2, "0");
-        let extensionIndex = 0;
-
-        // 読込エラーのたびに呼ばれ、次の拡張子で同じ画像を探し直す。
-        function tryNextExtension() {
-            // 全拡張子が見つからなかった場合は画像なし。
-            if (extensionIndex >= diaryImageExtensions.length) {
-                resolve(null);
-                return;
-            }
-
-            const extension = diaryImageExtensions[extensionIndex];
-            extensionIndex += 1;
-            image.src = `images/${date}-${fileNumber}.${extension}`;
-        }
 
         image.alt = "";
         // 画面外でも即座に読み込む(縮小処理に必要なため)。
         image.loading = "eager";
         // 元画像の読込成功時: canvasで縮小し、縮小後の画像が読めてから表示用に返す。
         image.addEventListener("load", function handleSourceLoad() {
-            image.removeEventListener("error", tryNextExtension);
             image.removeEventListener("load", handleSourceLoad);
             try {
                 const canvas = document.createElement("canvas");
@@ -119,13 +102,15 @@ function loadDiaryImage(date, sequence) {
                 reject(error);
             }
         });
-        // 読込失敗(ファイルなし)時は次の拡張子を試す。最初の1回は手動で開始する。
-        image.addEventListener("error", tryNextExtension);
-        tryNextExtension();
+        // JPGが存在しない場合は、次の連番画像がないものとして扱う。
+        image.addEventListener("error", function () {
+            resolve(null);
+        }, { once: true });
+        image.src = `images/${date}-${fileNumber}.jpg`;
     });
 }
 
-// 日記1件に対応する画像(01, 02, ...)を順に探して、見つかった分をarticleの下に表示する。
+// 日記画像(01, 02, ...)を順に探し、読み込み完了ごとに表示する。
 async function appendDiaryImages(article, title) {
     // 日付が読めないタイトルでは何もしない。
     const date = getDiaryImageDate(title);
@@ -135,7 +120,9 @@ async function appendDiaryImages(article, title) {
 
     const imageList = document.createElement("div");
     imageList.className = "diary-entry-image-grid";
-    // 画像は連番で保存されるため、最初の欠番で検索を終える。
+    const imageFrame = document.createElement("div");
+    imageFrame.className = "diary-entry-images";
+    imageFrame.appendChild(imageList);
     for (let sequence = 1; sequence <= 99; sequence += 1) {
         let image;
         try {
@@ -145,17 +132,14 @@ async function appendDiaryImages(article, title) {
             return;
         }
         if (!image) {
-            break;
+            return;
         }
 
         imageList.appendChild(image);
-    }
-    // 1枚以上見つかった場合だけ画像枠を表示する。
-    if (imageList.childElementCount > 0) {
-        const imageFrame = document.createElement("div");
-        imageFrame.className = "diary-entry-images";
-        imageFrame.appendChild(imageList);
-        article.appendChild(imageFrame);
+        // 最初の画像が準備できた時点で表示し、後続画像は準備でき次第追加する。
+        if (!imageFrame.isConnected) {
+            article.appendChild(imageFrame);
+        }
     }
 }
 

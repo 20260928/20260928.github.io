@@ -60,7 +60,6 @@ const recentMessagesContainer = document.createElement("div");
 
 // 非同期再読込の世代番号を保持する。
 let messageLoadVersion = 0;
-recentMessagesContainer.className = "chat-recent-messages";
 // 直近の投稿だけを灰色のコメント欄に配置する。
 chat.replaceChildren(recentMessagesContainer);
 
@@ -82,7 +81,6 @@ function createMessageElement(row) {
     // 1件のDBレコードを、本文・投稿日時を持つチャット要素に変換する。
     const messageElement = document.createElement("div");
     messageElement.className = "chat-message";
-    messageElement.classList.toggle("admin-post", row.is_admin);
 
     const dateElement = document.createElement("span");
     dateElement.className = "chat-message-date";
@@ -217,8 +215,6 @@ async function loadMessage() {
     // 画面外で組み立てて一括反映し、読込途中の表示崩れを防ぐ。
     const stagedRecentMessages = document.createElement("div");
     const stagedOlderMessages = document.createElement("div");
-    stagedRecentMessages.className = "chat-recent-messages";
-    stagedOlderMessages.className = "chat-older-messages";
     stagedRecentMessages.style.position = "fixed";
     stagedRecentMessages.style.left = "-10000px";
     stagedRecentMessages.style.top = "0";
